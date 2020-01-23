@@ -1,0 +1,23 @@
+---
+title: "Piramide Poblacional Mexico"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Descarga de los datos. 
+
+Descargamos los datos de población de la página de la encuesta intercensal 2015. 
+
+```{r}
+
+
+```
+
+
+# 2. Procesado de la información. 
+
+
+
