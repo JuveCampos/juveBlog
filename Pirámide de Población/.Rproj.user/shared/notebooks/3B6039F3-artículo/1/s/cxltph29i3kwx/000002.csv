@@ -1,0 +1,7 @@
+"0","# Leemos datos
+# Por tamaño de localidad
+bd <- read_xls(""mor_pop.xls"", sheet = 2, skip = 6)
+"
+"2","Error in read_xls(""mor_pop.xls"", sheet = 2, skip = 6) : 
+  could not find function ""read_xls""
+"

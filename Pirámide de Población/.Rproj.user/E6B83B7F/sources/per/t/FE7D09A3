@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580000435140.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2685031315",
+    "id" : "FE7D09A3",
+    "lastKnownWriteTime" : 1580098783,
+    "last_content_update" : 1580098783650,
+    "path" : "~/Documents/GitHub/juveBlog/Pirámide de Población/artículo.Rmd",
+    "project_path" : "artículo.Rmd",
+    "properties" : {
+        "cursorPosition" : "65,46",
+        "last_setup_crc32" : "EE4155BBe92ded1",
+        "scrollLine" : "60"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

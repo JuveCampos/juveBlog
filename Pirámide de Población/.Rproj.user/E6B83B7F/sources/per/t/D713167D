@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580000433891.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3202958680",
+    "id" : "D713167D",
+    "lastKnownWriteTime" : 1580098610,
+    "last_content_update" : 1580098610586,
+    "path" : "~/Documents/GitHub/juveBlog/Pirámide de Población/Gráfica de Pirámida.R",
+    "project_path" : "Gráfica de Pirámida.R",
+    "properties" : {
+        "cursorPosition" : "95,26",
+        "scrollLine" : "81"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
