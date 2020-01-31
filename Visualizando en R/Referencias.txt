@@ -1,0 +1,49 @@
+
+Visualization Techniques for Programmers (and Why You Should Be Using Them).
+https://medium.com/la-vie-en-code/visualization-techniques-for-programmers-and-why-you-should-be-using-them-ed9cfba062da
+
+Why I use ggplot2
+http://varianceexplained.org/r/why-I-use-ggplot2/
+
+Excel vs R: A Brief Introduction to R
+https://www.jessesadler.com/post/excel-vs-r/
+
+Pre-teaching R. What's your best argument for switching to R from Excel?
+https://community.rstudio.com/t/pre-teaching-r-whats-your-best-argument-for-switching-to-r-from-excel/3182
+
+Why I don't use ggplot2
+https://simplystatistics.org/2016/02/11/why-i-dont-use-ggplot2/
+
+Why is D3.js so complex compared to ggplot?
+https://www.quora.com/Why-is-D3-js-so-complex-compared-to-ggplot
+https://comparisons.financesonline.com/ggplot2-vs-d3-js
+
+Tableau reflection on Data Visualuzation: 
+https://www.tableau.com/learn/articles/data-visualization
+
+When should I use ggplot2 instead of Tableau? 
+https://datascience.stackexchange.com/questions/29602/when-should-i-use-ggplot2-instead-of-tableau
+
+Fundamentals of Data Visualization 
+https://serialmentor.com/dataviz/aesthetic-mapping.html
+
+Dataviz Online 
+- Comparison of 10 alternatives
+https://www.capterra.com/sem-compare/data-visualization-software?gclid=Cj0KCQiAmsrxBRDaARIsANyiD1pS4rPcPcAEGSqVhHR1YCq_3bczwvNyyxG3sJNcfzqtBHMJhDlyfAwaAn6QEALw_wcB
+
+- RawGraph
+https://rawgraphs.io/
+
+- 31 Data Visualization tools
+https://www.springboard.com/blog/31-free-data-visualization-tools/
+
+- DataWrapper
+With its focus on providing code-free data visualization tools for the purpose of storytelling and journalism, Datawrapper has provided publications around the world with the tools they need to create fully responsive charts that are fast, interactive, and completely customizable to ensure that every chart fits the publication.
+https://www.datawrapper.de/
+
+
+
+
+
+
+

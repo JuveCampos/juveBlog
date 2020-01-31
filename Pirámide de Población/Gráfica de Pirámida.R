@@ -6,6 +6,7 @@ options(scipen = 999)
 library(tidyverse)
 library(tidyr)
 library(ggthemes)
+library(extrafont)
 
 # Leemos datos
 # Por tamaño de localidad
@@ -105,7 +106,117 @@ ggplot(pop, aes(x = `Grupos quinquenales de edad`,
 #   tema
 
 
+######################################################################################################
 
+# Descarga de los datos.
+library(curl)
+library(readxl)
+curl::curl_download(url = "https://www.inegi.org.mx/contenidos/programas/intercensal/2015/tabulados/01_poblacion_chis.xls", destfile = "Poblacion/chis_pop.xls")
+curl::curl_download(url = "https://www.inegi.org.mx/contenidos/programas/intercensal/2015/tabulados/01_poblacion_tab.xls", destfile = "Poblacion/tab_pop.xls")
+# Leemos datos
+# Por tamaño de localidad
+chis <- read_xls("Poblacion/chis_pop.xls", sheet = 2, skip = 6)
+tab <- read_xls("Poblacion/tab_pop.xls", sheet = 2, skip = 6)
+
+# Librerias
+library(tidyverse)
+library(tidyr)
+# Procesamos datos
+pop <- chis %>%
+  # Filtramos los renglones vacios, 
+  # los renglones donde el Tamaño de localidad` es el Total y 
+  # los `Grupos quinquenales de edad` son todos "Total"    
+  filter(!is.na(Estimador) &
+           Estimador == "Valor" &
+           `Tamaño de localidad` == "Total" &
+           `Grupos quinquenales de edad` != "Total") %>%
+  mutate(totH = sum(Hombres), 
+         totM = sum(Mujeres)) %>% 
+  mutate(Hombres = (Hombres/totH)*100, 
+         Mujeres = (Mujeres/totM)*100
+         ) %>% 
+  select(-totH, -totM) %>% 
+  # Hacemos pivot longer rotando las columnas hombres y mujeres    
+  pivot_longer(cols = c("Hombres", "Mujeres"),
+               names_to = "Sexo",
+               values_to = "Poblacion por Sexo") %>% 
+  # Nos quedamos con columnas utiles  
+  select(`Entidad federativa`, `Grupos quinquenales de edad`, 
+         `Población total`, Sexo, `Poblacion por Sexo`) %>% 
+  filter(!(`Grupos quinquenales de edad` %in% c("75 años y más","No especificado")))
+
+
+# Grafica
+ggplot(pop, aes(x = `Grupos quinquenales de edad`,
+                y = `Poblacion por Sexo`,
+                fill = Sexo)) +
+  geom_bar(data = subset(pop, Sexo == "Hombres") %>% mutate(`Poblacion por Sexo` = -`Poblacion por Sexo`),
+           stat = "identity", width = 0.5, fill = "blue") +
+  geom_bar(data = subset(pop, Sexo == "Mujeres"),
+           stat = "identity", width = 0.5, fill = "pink") + 
+  coord_flip() + 
+  ggthemes::theme_tufte() + 
+  theme(plot.title = element_text(family = "Arial", hjust = 0.5, size = 20), 
+        axis.text.x = element_text(family = "Arial"), 
+        axis.text.y = element_text(family = "Arial")
+        ) + 
+  labs(title = "Pirámide Poblacional de Chiapas, 2015", 
+       x = "", 
+       y = "Hombres                        Mujeres", 
+       caption = "Fuente: INEGI. Encuesta intercensal 2015. Tabulados de Población \nSe omiten personas de 75 años y más, por venir aglomeradas en un mismo grupo de edad."
+       ) + 
+  scale_y_continuous(breaks = seq(-12, 12, by = 2), labels = paste0(seq(-12, 12, by = 2), "%"))
+  
+
+ggsave(filename= "Poblacion/ppChiapas.png", dpi = 300)
+
+
+pop <- tab %>%
+  # Filtramos los renglones vacios, 
+  # los renglones donde el Tamaño de localidad` es el Total y 
+  # los `Grupos quinquenales de edad` son todos "Total"    
+  filter(!is.na(Estimador) &
+           Estimador == "Valor" &
+           `Tamaño de localidad` == "Total" &
+           `Grupos quinquenales de edad` != "Total") %>%
+  mutate(totH = sum(Hombres), 
+         totM = sum(Mujeres)) %>% 
+  mutate(Hombres = (Hombres/totH)*100, 
+         Mujeres = (Mujeres/totM)*100
+  ) %>% 
+  select(-totH, -totM) %>% 
+  # Hacemos pivot longer rotando las columnas hombres y mujeres    
+  pivot_longer(cols = c("Hombres", "Mujeres"),
+               names_to = "Sexo",
+               values_to = "Poblacion por Sexo") %>% 
+  # Nos quedamos con columnas utiles  
+  select(`Entidad federativa`, `Grupos quinquenales de edad`, 
+         `Población total`, Sexo, `Poblacion por Sexo`) %>% 
+  filter(!(`Grupos quinquenales de edad` %in% c("75 años y más","No especificado")))
+
+
+# Grafica
+ggplot(pop, aes(x = `Grupos quinquenales de edad`,
+                y = `Poblacion por Sexo`,
+                fill = Sexo)) +
+  geom_bar(data = subset(pop, Sexo == "Hombres") %>% mutate(`Poblacion por Sexo` = -`Poblacion por Sexo`),
+           stat = "identity", width = 0.5, fill = "blue") +
+  geom_bar(data = subset(pop, Sexo == "Mujeres"),
+           stat = "identity", width = 0.5, fill = "pink") + 
+  coord_flip() + 
+  ggthemes::theme_tufte() + 
+  theme(plot.title = element_text(family = "Arial", hjust = 0.5, size = 20), 
+        axis.text.x = element_text(family = "Arial"), 
+        axis.text.y = element_text(family = "Arial")
+  ) + 
+  labs(title = "Pirámide Poblacional de Tabasco, 2015", 
+       x = "", 
+       y = "Hombres                        Mujeres", 
+       caption = "Fuente: INEGI. Encuesta intercensal 2015. Tabulados de Población \nSe omiten personas de 75 años y más, por venir aglomeradas en un mismo grupo de edad."
+  ) + 
+  scale_y_continuous(breaks = seq(-12, 12, by = 2), labels = paste0(seq(-12, 12, by = 2), "%"))
+
+ggsave(filename= "Poblacion/ppTabasco.png", dpi = 300)
 
 # Ejemplo práctico para checar!
 # http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
