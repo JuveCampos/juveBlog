@@ -125,13 +125,16 @@ La primera versión que realizaremos será utilizando la función `geom_bar()`. 
 ggplot(pop, aes(x = `Grupos quinquenales de edad`,
                 y = `Poblacion por Sexo`,
                 fill = Sexo)) +
-  geom_bar(data = subset(pop, Sexo == "Hombres") %>% mutate(`Poblacion por Sexo` = -`Poblacion por Sexo`),
-                 stat = "identity", width = 0.5, fill = "blue") +
-  geom_bar(data = subset(pop, Sexo == "Mujeres"),
-                 stat = "identity", width = 0.5, fill = "pink") + 
+  geom_col(data = subset(pop, Sexo == "Hombres") %>% 
+             mutate(`Poblacion por Sexo` = -`Poblacion por Sexo`),
+              width = 0.5, fill = "blue") +
+  geom_col(data = subset(pop, Sexo == "Mujeres"),
+           width = 0.5, fill = "pink") + 
   coord_flip()
 
 ```
+
+
 <b style = 'color:red; text-align:center;'>Nótese las escalas del eje _x_</b>
 
 Ahora, tenemos que enfocarnos en la parte del eje de población. Primero que nada, tenemos que hacer un poco de análisis. 

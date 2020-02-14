@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1581614019748.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "246822997",
+    "id" : "FF240E55",
+    "lastKnownWriteTime" : 1581648388,
+    "last_content_update" : 1581648388968,
+    "path" : "~/Documents/GitHub/juveBlog/Distancias a una linea/distancia lineal más proxima a una linea.R",
+    "project_path" : "distancia lineal más proxima a una linea.R",
+    "properties" : {
+        "cursorPosition" : "45,9",
+        "scrollLine" : "44"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
