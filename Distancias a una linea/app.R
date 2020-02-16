@@ -1,0 +1,97 @@
+# Librerias ----
+library(shiny)
+library(leaflet)
+library(tidyverse)
+
+# Funciones globales ---- 
+# Le copipegamos, tal cual, lo que hicimos arriba
+dibuja_lineas_minima_distancia <- function(X,Y){
+  
+  # Creamos el punto a partir de los argumentos X y Y
+  pto <- data.frame(x = X, y = Y) %>% 
+    st_as_sf(coords = c("x", "y")) 
+  
+  # Homologamos el Sistema de Coordenadas de Referencia
+  st_crs(pto) <- st_crs(f)
+  
+  # Extraemos los vértices de la linea
+  ptos_linea <- st_coordinates(f) %>%
+    as.data.frame() %>%
+    st_as_sf(coords = c("X", "Y")) 
+  
+  # Homologamos el Sistema de Coordenadas de Referencia
+  st_crs(ptos_linea) <- st_crs(f)
+  
+  # Sacamos las distancias del punto a todos los vertices de la frontera
+  distancias <- st_distance(ptos_linea, pto)
+  
+  # Obtencion de la distancia minima
+  distancia_minima <- min(distancias) 
+  
+  # Guardamos el punto de la frontera con la distancia minima
+  punto_frontera <<- 
+    ptos_linea[distancias == distancia_minima,]
+  
+  # Construimos la linea de distancia minima
+  linea <- st_linestring(matrix(c(pto[,"geometry"] %>% 
+                                    st_coordinates(), 
+                                  punto_frontera[,"geometry"] %>%       st_coordinates()), ncol = 2, byrow = TRUE))  
+  
+  # Seleccionamos la linea como objeto a retornar de la funcion 
+  return(linea)
+  
+}
+
+# Hacemos una interfaz de usuario sencilla: 
+ui <- shinyUI({
+fluidPage(
+  titlePanel("Calculo de la distancia a la frontera norte"), 
+  sidebarLayout(
+    sidebarPanel(
+      h1("Sidebar Pane")
+    ), 
+    mainPanel(
+      fluidPage(
+        fluidRow(
+          column(12,
+            leafletOutput("mapa", height = "600px")
+          )
+        )
+      )
+    )
+  )
+)
+})
+  
+
+# Programamos el mapa 
+server <- function(input, output) ({
+
+output$mapa <- renderLeaflet({
+  
+  leaflet(options = leafletOptions(zoomControl = TRUE, minZoom = 5)) %>% 
+    setMaxBounds(lng1 = -86.72, lat1 = 14.52, lng2 = -117.13, lat2 = 32.53) %>% 
+    addProviderTiles("CartoDB.Positron") 
+  # %>% 
+  #   leaflet.extras::suspendScroll(wakeMessage = "Haga click o mantenga el cursor sobre el mapa", 
+  #                                 wakeTime = 1250)
+  
+})
+
+# Captamos donde da el click el usuario
+pol_of_click <- reactiveValues(clickedShape = NULL)
+
+observeEvent(input$mapa_click,
+             {
+               pol_of_click <- input$mapa_click
+               print(pol_of_click)
+               # p <- input$mapa_click$id
+               # print(p)
+               # pol_of_click$clickedShape <- input$mapa_shape_click$id
+               # print(as.numeric(pol_of_click$clickedShape))
+             })
+
+
+})
+
+shinyApp(ui, server)

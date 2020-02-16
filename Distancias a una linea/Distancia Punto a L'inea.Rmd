@@ -29,7 +29,7 @@ curl::curl_download("https://opendata.arcgis.com/datasets/e735940321bd4383bab528
 destfile = "frontera.zip")
 ```
 
-Esto me descargó un archivo `*.zip`, que yo nombré como `frontera.zip`, en mi directorio de trabajo. Como ya caducó mi licencia de WinRar y no puedo descomprimirlo en la computadora, utilizo el siguiente código para extraer la información: 
+Esto me descargó un archivo `*.zip`, que yo nombré como `frontera.zip`, en mi directorio de trabajo. Como ya caducó mi licencia de WinRar 😔 y no puedo descomprimirlo en la computadora, utilizo el siguiente código para extraer la información: 
 
 ```{r }
 # Deszipeado
@@ -72,7 +72,7 @@ Ahora, creamos una tabla que almacene estas coordenadas latitud/longitud:
 pto <- data.frame(x = -99.20775, y = 19.303741) %>% 
   st_as_sf(coords = c("x", "y")) 
 
-# Homologamos el sistema de Coordenadas de Referencia con la base de la línea de la Frontera Norte
+# Homologamos el Sistema de Coordenadas de Referencia con la base de la línea de la Frontera Norte
 st_crs(pto) <- st_crs(f)
 ```
 
@@ -84,13 +84,13 @@ Ahora calculamos la distancia.
 st_distance(pto, f) 
 ```
 
-Y si, la distancia de El Colmex a el punto más cercano de la frontera norte (quien sabe cual) es de 746.6889 km ( _746688.9_ m). 
+Y si, la distancia de El Colmex a el punto más cercano de la frontera norte (quién sabe cual) es de 746.6889 km ( _746688.9_ m). 
 
-Y ahí está la respuesta a la distancia. Fin. 
+Y ahí está la respuesta a la distancia. **Fin**. 
 
 ## 5. ¿A qué punto se calculó la distancia? 
 
-Pero ahora pueden surgir preguntas muy lógicas sobre esta respuesta... ¿Qué método utiliza R para calcular esta distancia? ¿A qué punto de la frontera se le calculó la distancia? 
+Pero ahora pueden surgir preguntas muy lógicas sobre esta respuesta... _¿Qué método utiliza R para calcular esta distancia?_, _¿A qué punto de la frontera se le calculó la distancia?_ 
 
 Entonces, hagamos el cálculo más detenidamente, para esto, propongo descomponer la línea de la frontera norte en sus vértices: 
 
@@ -123,7 +123,7 @@ distancia_minima <- min(distancias)
 (distancia_minima / 1000) %>% as.numeric()
 ```
 
-Como podemos ver, la distancia mínima es la misma distancia que calcula la función `st_distance()`. Ahora, ¿cuál punto de todos esos es el punto más cercano al Colmex? 
+Como podemos ver, la distancia mínima es la misma distancia que calcula la función `st_distance()`. Ahora, ¿cuál punto de todos esos es el punto más cercano al Colmex? Para esto, filtramos las distancias hasta quedarnos aquella observación que tenga la distancia igual a la distancia mínima. 
 
 ```{r }
 # Punto minimo
@@ -158,10 +158,10 @@ Y resulta (haciendo zoom podemos darnos cuenta) que el punto más cercano a la f
 
 ## 6. ¿Y si quiero calcular la distancia a otro punto? 
 
-Para hacerlo para cualquier punto de México, hacemos una función: 
+Para hacerlo para cualquier punto de México, hacemos una función. Las funciones son pedazos de código que, entre otras cosas, se programan para llevar a cabo tareas repetitivas (como todo lo que hicimos arriba). Primero, empezaremos haciendo una función para calcular solamente las distancias a la frontera. 
 
 ```{r }
-
+# Función para calcular las distancias. 
 distancia <- function(X, Y){
   pto <- data.frame(x = X, y = Y) %>% 
           st_as_sf(coords = c("x", "y")) 
@@ -169,10 +169,10 @@ distancia <- function(X, Y){
   st_distance(pto, f)       
 }
 
-# Distancia a un punto del mpio de Mexicali
+# Distancia a un punto del mpio de Mexicali, BC
 distancia(X = -115.418556, Y = 31.795112)
 
-# Distancia a Puerto Peñasco
+# Distancia a Puerto Peñasco, Sonora
 distancia(X = -113.534104, Y = 31.309766)
 
 # Distancia al CIDE
@@ -183,3 +183,73 @@ distancia(X = c(-115.418556,-113.534104, -99.263426),
           Y = c(31.795112, 31.309766, 19.374515))
 
 ```
+
+## 7. ¿Y la trayectoria? 
+
+Y ahora, haremos otra función para dibujar las líneas. Esta función va a empaquetar todos los pasos que seguímos para determinar el punto de la frontera al cual llegaba la línea con la distancia mínima. 
+
+```{r }
+
+# Funcion para dibujar las lineas de minima distancia
+# Nota, esta función asume que previamente ya cargamos 
+# la base de datos de la frontera y la almacenamos en el objeto f
+dibuja_lineas_minima_distancia <- function(X,Y){
+
+  # Creamos el punto a partir de los argumentos X y Y
+  pto <- data.frame(x = X, y = Y) %>% 
+        st_as_sf(coords = c("x", "y")) 
+
+  # Homologamos el Sistema de Coordenadas de Referencia
+  st_crs(pto) <- st_crs(f)
+  
+  # Extraemos los vértices de la linea
+  ptos_linea <- st_coordinates(f) %>%
+    as.data.frame() %>%
+    st_as_sf(coords = c("X", "Y")) 
+  
+  # Homologamos el Sistema de Coordenadas de Referencia
+  st_crs(ptos_linea) <- st_crs(f)
+
+  # Sacamos las distancias del punto a todos los vertices de la frontera
+  distancias <- st_distance(ptos_linea, pto)
+
+  # Obtencion de la distancia minima
+  distancia_minima <- min(distancias) 
+
+  # Guardamos el punto de la frontera con la distancia minima
+  punto_frontera <<- 
+    ptos_linea[distancias == distancia_minima,]
+
+  # Construimos la linea de distancia minima
+  linea <- st_linestring(matrix(c(pto[,"geometry"] %>% 
+                                st_coordinates(), 
+                                punto_frontera[,"geometry"] %>%       st_coordinates()), ncol = 2, byrow = TRUE))  
+  
+  # Seleccionamos la linea como objeto a retornar de la funcion 
+  return(linea)
+  
+}
+
+# Probamos la funcion, sacando la linea del CIDE a la frontera
+lineaCIDE <- dibuja_lineas_minima_distancia(X = -99.263426, Y = 19.374515)
+class(lineaCIDE)
+leaflet(lineaCIDE) %>% addTiles() %>% addPolylines(color = "#005700")
+
+```
+
+Pues ahora tenemos una función que nos calcula la distancia y las líneas. Ahora, a partir de estas funciones, cualquier programador experimentado de R puede calcular las distancias y la trayectoria en línea recta a la frontera a partir de solo tener las coordenadas `X` y `Y` del punto de interés, y copipegando las funciones de arriba en su sesión de RStudio.  
+
+## 8. ¿Y si hacemos un shiny?  
+
+Bueno, y ¿si hacemos una solución en la cual cualquier usuario pueda calcular la distancia de cualquier punto a la frontera sur de Estados Unidos? Esto lo vamos a lograr con la librería `shiny` y pegando todo el código que hemos hecho arriba. 
+
+Primero, programamos la interfaz de usuario (que va a ser un mapa nada mas).
+
+
+
+
+
+
+
+
+

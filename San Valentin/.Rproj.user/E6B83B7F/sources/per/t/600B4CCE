@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1581728012492.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3654337514",
+    "id" : "600B4CCE",
+    "lastKnownWriteTime" : 1581729205,
+    "last_content_update" : 1581729205977,
+    "path" : "~/Documents/GitHub/juveBlog/San Valentin/drawingAHeartOnGgplot.R",
+    "project_path" : "drawingAHeartOnGgplot.R",
+    "properties" : {
+        "cursorPosition" : "17,20",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

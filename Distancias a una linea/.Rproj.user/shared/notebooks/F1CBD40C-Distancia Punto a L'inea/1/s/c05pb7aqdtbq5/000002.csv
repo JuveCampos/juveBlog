@@ -1,0 +1,6 @@
+"0","# Las coordenadas del Colmex en formato tabla-dataframe"
+"0","pto <- data.frame(x = -99.20775, y = 19.303741) %>% "
+"0","  st_as_sf(coords = c(""x"", ""y"")) "
+"0",""
+"0","# Homologamos el sistema de Coordenadas de Referencia con la base de la línea de la Frontera Norte"
+"0","st_crs(pto) <- st_crs(f)"
