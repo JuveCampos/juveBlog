@@ -5,9 +5,9 @@ account: lnppmicrositio
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1820411
-bundleId: 2805409
+bundleId: 2806901
 url: https://lnppmicrositio.shinyapps.io/distanciaAFrontera/
-when: 1581908853.27797
+when: 1581957895.1263
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: conversacionJesus.png|coordColmex.png|distancia lineal más proxima a una linea.R|Distancia Punto a L'inea.Rmd|Distancia-Punto-a-L-inea.html|frontera.zip
+ignoredFiles: conversacionJesus.png|coordColmex.png|Distancia-Punto-a-L-inea.html|Distancia-Punto-a-L-inea.Rmd|distancia lineal m?s proxima a una linea.R|Distancia Punto a L'inea.Rmd|distanciaPuntoLinea.html|distanciaPuntoLinea.Rmd|frontera.zip

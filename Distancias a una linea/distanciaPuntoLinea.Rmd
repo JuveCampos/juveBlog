@@ -23,7 +23,7 @@ Pues tal vez esa podría ser una opción, pero el algoritmo de Googlear la base 
 
 Si eres de los que les dá flojera ir a la página, descargar archivos, ir a la carpeta de _Descargas_, y mover el archivo a la carpeta de trabajo, puedes utilizar el código de abajo (obviamente, descargando primero el paquete `curl` del CRAN).
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Descarga datos automaticamente, si te da flojera darle cl
 curl::curl_download("https://opendata.arcgis.com/datasets/e735940321bd4383bab528a91bf526f8_0.zip?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D",
 destfile = "frontera.zip")
@@ -31,7 +31,7 @@ destfile = "frontera.zip")
 
 Esto me descargó un archivo `*.zip`, que yo nombré como `frontera.zip`, en mi directorio de trabajo. Como ya caducó mi licencia de WinRar 😔 y no puedo descomprimirlo en la computadora, utilizo el siguiente código para extraer la información: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Deszipeado
 unzip(zipfile = "frontera.zip")
 ```
@@ -42,7 +42,7 @@ Una vez descomprimido, tengo ahora un montón de archivos en mi directorio de tr
 
 Para abrir la base de datos de la frontera norte, usamos la función `sf::st_read()` como se ve a continuación: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Librerias
 library(sf)
 library(tidyverse)
@@ -52,7 +52,7 @@ f <- st_read("Mexico_and_US_Border.shp")
 
 Y ya. así lo abrimos. Para corroborar que sea efectivamente un archivo geográfico, lo ploteamos (dibujamos): 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Ploteado (te recomiendo que no le muevas al max.plot = 1)
 plot(f, max.plot = 1)
 ```
@@ -67,7 +67,7 @@ Para sacar las coordenadas del Colmex, lo buscamos en Google Maps, y le picamos 
 
 Ahora, creamos una tabla que almacene estas coordenadas latitud/longitud: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Las coordenadas del Colmex en formato tabla-dataframe
 pto <- data.frame(x = -99.20775, y = 19.303741) %>% 
   st_as_sf(coords = c("x", "y")) 
@@ -80,7 +80,7 @@ st_crs(pto) <- st_crs(f)
 
 Ahora calculamos la distancia. 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 st_distance(pto, f) 
 ```
 
@@ -94,7 +94,7 @@ Pero ahora pueden surgir preguntas muy lógicas sobre esta respuesta... _¿Qué 
 
 Entonces, hagamos el cálculo más detenidamente, para esto, propongo descomponer la línea de la frontera norte en sus vértices: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Descomponemos la linea en sus coordenadas
 ptos_linea <- st_coordinates(f) %>%
   as.data.frame() %>%
@@ -108,14 +108,14 @@ st_crs(ptos_linea)
 
 Y ahora calculamos las distancias del Colmex a todos los vértices de la frontera norte: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 distancias <- st_distance(ptos_linea, pto)
 head(distancias)
 ```
 
 Y ahora, sacamos la línea con la menor longitud: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Obtencion de la distancia minima
 distancia_minima <- min(distancias) 
 
@@ -125,7 +125,7 @@ distancia_minima <- min(distancias)
 
 Como podemos ver, la distancia mínima es la misma distancia que calcula la función `st_distance()`. Ahora, ¿cuál punto de todos esos es el punto más cercano al Colmex? Para esto, filtramos las distancias hasta quedarnos aquella observación que tenga la distancia igual a la distancia mínima. 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Punto minimo
 punto_frontera <- 
   ptos_linea[distancias == distancia_minima,]
@@ -133,7 +133,7 @@ punto_frontera <-
 
 Y para visualizarlo, creamos una línea que va del Colmex a dicho punto: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # linea de distancia
 linea <- st_linestring(matrix(c(pto[,"geometry"] %>% 
                               st_coordinates(), 
@@ -142,7 +142,7 @@ linea <- st_linestring(matrix(c(pto[,"geometry"] %>%
 
 Y lo hacemos en un mapa: 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 library(leaflet)
 
 # Hacemos el mapa 
@@ -160,7 +160,7 @@ Y resulta (haciendo zoom podemos darnos cuenta) que el punto más cercano a la f
 
 Para hacerlo para cualquier punto de México, hacemos una función. Las funciones son pedazos de código que, entre otras cosas, se programan para llevar a cabo tareas repetitivas (como todo lo que hicimos arriba). Primero, empezaremos haciendo una función para calcular solamente las distancias a la frontera. 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 # Función para calcular las distancias. 
 distancia <- function(X, Y){
   pto <- data.frame(x = X, y = Y) %>% 
@@ -188,7 +188,7 @@ distancia(X = c(-115.418556,-113.534104, -99.263426),
 
 Y ahora, haremos otra función para dibujar las líneas. Esta función va a empaquetar todos los pasos que seguímos para determinar el punto de la frontera al cual llegaba la línea con la distancia mínima. 
 
-```{r }
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 
 # Funcion para dibujar las lineas de minima distancia
 # Nota, esta función asume que previamente ya cargamos 
@@ -243,6 +243,6 @@ Pues ahora tenemos una función que nos calcula la distancia y las líneas. Ahor
 
 Bueno, y ¿si hacemos una solución en la cual cualquier usuario pueda calcular la distancia de cualquier punto a la frontera sur de Estados Unidos? Esto lo vamos a lograr con la librería `shiny` y pegando todo el código que hemos hecho arriba. 
 
-```{r}
+```{r, message=FALSE, cache=FALSE,warning=FALSE}
 knitr::include_app("https://lnppmicrositio.shinyapps.io/distanciaAFrontera/")
 ```

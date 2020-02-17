@@ -1,0 +1,4 @@
+"0","# linea de distancia"
+"0","linea <- st_linestring(matrix(c(pto[,""geometry""] %>% "
+"0","                              st_coordinates(), "
+"0","                              punto_frontera[,""geometry""] %>% st_coordinates()), ncol = 2, byrow = TRUE))"
