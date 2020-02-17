@@ -243,13 +243,6 @@ Pues ahora tenemos una función que nos calcula la distancia y las líneas. Ahor
 
 Bueno, y ¿si hacemos una solución en la cual cualquier usuario pueda calcular la distancia de cualquier punto a la frontera sur de Estados Unidos? Esto lo vamos a lograr con la librería `shiny` y pegando todo el código que hemos hecho arriba. 
 
-Primero, programamos la interfaz de usuario (que va a ser un mapa nada mas).
-
-
-
-
-
-
-
-
-
+```{r}
+knitr::include_app("https://lnppmicrositio.shinyapps.io/distanciaAFrontera/")
+```
