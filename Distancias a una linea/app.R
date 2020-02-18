@@ -129,9 +129,9 @@ pol_of_click <- reactiveValues(click = NULL)
 
 observe({
   if(is.null(input$mapa_click)){
-    # print("Esta madre esta nula")
+    
   } else {
-    # print("Esta madre no esta taaan nula")
+   
     observeEvent(input$mapa_click,
                  {
                    pol_of_click <- input$mapa_click
