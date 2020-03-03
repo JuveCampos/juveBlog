@@ -1,0 +1,72 @@
+# SCRIPT: GENERACIÓN DEL INDICADOR 042
+# Proyecciones Población CONAPO
+# AUTOR: JORGE JUVENAL CAMPOS FERREIRA
+# FECHA: 28 DE ENERO, 2020
+
+# Armamos base general de proyecciones municipales
+
+# Enlaces de Descarga de datos:
+# http://www.conapo.gob.mx/work/models/CONAPO/Datos_Abiertos/Proyecciones2018/base_municipios_final_datos_01.rar
+# http://www.conapo.gob.mx/work/models/CONAPO/Datos_Abiertos/Proyecciones2018/base_municipios_final_datos_02.rar
+
+# Librerias
+library(tidyverse)
+library(rebus)
+
+# Variables globales
+numero <- "042"
+indicador <- "Proyecciones de Población CONAPO"
+
+# Bases de datos (guardar el descomprimido del zip en una carpeta llamada Municipios)
+# bd1 <- read.csv("Poblacion/Proyecciones CONAPO/base_municipios_final_datos_01.csv", encoding = "latin1")
+# bd2 <- read.csv("Poblacion/Proyecciones CONAPO/base_municipios_final_datos_02.csv", encoding = "latin1")
+
+# COmputadora de Juve!
+bd1 <- read.csv("D:/Documents/GitHub/CAF_Centroamerica/Código/Poblacion/Proyecciones CONAPO/base_municipios_final_datos_01.csv", 
+                encoding = "latin1") %>% 
+  select(CLAVE, CLAVE_ENT, NOM_ENT, MUN, AÑO, POB)
+bd2 <- read.csv("D:/Documents/GitHub/CAF_Centroamerica/Código/Poblacion/Proyecciones CONAPO/base_municipios_final_datos_02.csv", 
+                encoding = "latin1") %>% 
+  select(CLAVE, CLAVE_ENT, NOM_ENT, MUN, AÑO, POB)
+bd3 <- readxl::read_xlsx("D:/Documents/GitHub/CAF_Centroamerica/Código/Poblacion/Proyecciones CONAPO/Población CONAPO 2010-2030 (1).xlsx", sheet = 2) %>% 
+  rename(CLAVE = cvegeo) %>% 
+  rename(CLAVE_ENT = id_ent, CLAVE_MUN = id_mun, NOM_ENT = ent, MUN = mun)
+names(bd3) <- toupper(names(bd3))
+bd3 <- bd3 %>% select(CLAVE, CLAVE_ENT, NOM_ENT, MUN, AÑO, POB) %>% filter(AÑO < 2015)
+
+# Pegado de datos
+bd <- rbind.data.frame(bd1, bd2
+                       , bd3
+                       ) %>%
+  as_tibble() %>% 
+  arrange(AÑO)
+
+rm(bd1, bd2, bd3)
+
+# Procesado
+#bd <-
+bd <- bd %>%
+  group_by(CLAVE, CLAVE_ENT, NOM_ENT, MUN, AÑO) %>%
+  summarise(Poblacion = sum(POB)) %>%
+  ungroup() %>%
+  mutate(CVE_MUN = str_extract(string = CLAVE, pattern = "\\d\\d\\d" %R% END),
+         CVE_ENT = case_when(str_length(CLAVE_ENT) == 1 ~ paste0("0", as.character(CLAVE_ENT)),
+                             str_length(CLAVE_ENT) == 2 ~ as.character(CLAVE_ENT)),
+         CODGEO = paste0(CVE_ENT, CVE_MUN),
+         Indicador = indicador,
+         Clave = numero,
+         ) %>%
+  rename(Year = AÑO,
+         Entidad = NOM_ENT,
+         Municipio = MUN,
+         Valor = Poblacion
+         ) %>%
+  mutate(Ponderador = Valor) %>% 
+  select(Year,Clave,CVE_ENT,Entidad,CVE_MUN,Municipio,CODGEO,Indicador,Ponderador,Valor) %>% 
+  arrange(Year,CVE_ENT, CVE_MUN)
+
+write.csv(bd, "03_Resultados/042.csv",
+          row.names = F,
+          na = "",
+          fileEncoding = "UTF-8")
+

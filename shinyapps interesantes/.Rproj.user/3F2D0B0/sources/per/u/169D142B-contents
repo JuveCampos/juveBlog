@@ -1,0 +1,36 @@
+---
+title: "shinyappsInteresantes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Ejemplos de lo que se puede ver con shiny 
+
+1. **Métrica de gobierno abierto, 2019**
+
+https://lnppmicrositio.shinyapps.io/metricadegobiernoabierto2019/
+
+Página donde se muestran los resultados del estudio de la Métrica de Gobierno Abierto, realizado en 2018 por el CIDE. Esta aplicación es un tablero que complementa a los entregables impresos, que a su vez funciona como un repositorio de datos, de archivos, explicación de la metodología y sistema de consulta interactivo.
+
+2. **Distancia punto a línea**
+
+https://juvenalcampos.com/2020/02/18/distancia-punto-a-linea/
+
+En esta entrada de blog se incluye al final una aplicación shiny, la cual se construye a partir de una función previamente programada para calcular la distancia de un punto del mapa hasta el punto más cercano a la frontera con U.S.. Hacer el shiny permite que cualquier persona pueda calcular este punto y esta distancia, sin saber absolutamente nada de programación en R.
+
+2. **Ecobici (Datatón)**
+
+https://lnppmicrositio.shinyapps.io/ecobiciDataton/
+
+Esta aplicación fué una entrada para el concurso de Visualización de datos de ecobici del CIMAT. En esta aplicacion se muestran distintas visualizaciones hechas a partir de las bases de datos de bicicletas por estación de ecobici. 
+
+Esta aplicación conjuntó visualizaciones hechas en Python e incrustadas como páginas web, así como la elaboración de un API en dicho lenguaje del cual se alimenta la aplicación para poder mostrar sus datos. 
+
+## Aplicaciones shiny de otras personas. 
+
+
+

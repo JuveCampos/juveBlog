@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1583275380119.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1517377557",
+    "id" : "FD55114C",
+    "lastKnownWriteTime" : 1583189040,
+    "last_content_update" : 1583189040,
+    "path" : "~/GitHub/indicadoresMunicipales/02_Codigos/042_ProyeccionesPobCONAPO.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "15,20",
+        "scrollLine" : "13"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
