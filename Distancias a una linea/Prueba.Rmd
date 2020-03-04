@@ -1,0 +1,28 @@
+---
+title: "PruebaShinyEnRMarkdown"
+author: "Juvenal Campos"
+date: "2/18/2020"
+output: html_document
+---
+
+
+<style>
+  h2 {
+  color:red;
+  }
+  
+  iframe{
+        width: 1000px;
+        height: 750px;
+        border: 2px solid #ccc;
+    }
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r,message=FALSE,cache=FALSE,warning=FALSE,echo=FALSE,out.width=1000, out.height=1000}
+knitr::include_app("https://lnppmicrositio.shinyapps.io/distanciaAFrontera/")
+```

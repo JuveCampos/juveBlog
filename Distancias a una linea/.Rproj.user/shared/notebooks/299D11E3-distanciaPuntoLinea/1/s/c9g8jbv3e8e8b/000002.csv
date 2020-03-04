@@ -1,3 +1,0 @@
-"0","# Punto minimo"
-"0","punto_frontera <- "
-"0","  ptos_linea[distancias == distancia_minima,]"

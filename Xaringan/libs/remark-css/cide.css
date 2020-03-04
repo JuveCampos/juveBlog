@@ -1,0 +1,227 @@
+@import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+@import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700);
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+/******************
+ kunoichi.css must also be coupled with ninjutsu.css to be effective
+ See https://emitanaka.github.io/ninja-theme/kunoichi-theme-example.html for an example.
+
+******************/
+
+:root {
+    --main-color1: #FFFFFF;
+    --main-color2: #00434a; /*Rosa fuerte*/
+    --main-color3: #017683; /*LNPP*/
+    --main-color4: #00a1b3; /*Rosa mas bajito*/
+    --main-color5: white;
+    --text-color1: white;
+    --text-color2: white;
+    --text-color3: white;
+    --text-color4: white;
+    --text-color5: black;
+    --text-opacity: white;
+    --link-color: #005cd4;  /*Rosa clarito*/
+    --alert-color: #CF3C18; /*Rojo Alerta*/
+    --text-alert: white;
+    --code-background: #f0f0f0;
+    --code-inline-color: #ff8f40; /*Rojo Alerta*/
+    --code-text-color: black;
+    --code-highlight: rgba(225, 232, 86, 0.3); /*Morado*/
+    --color-opacity70: rgba(86,36,87,0.7); /*Morado Oscuro*/
+    --color-opacity50: rgba(86,36,87,0.5); /*Morado Oscuro*/
+    --color-opacity30: rgba(86,36,87,0.3); /*Morado Oscuro*/
+    --logo: url("https://www.cide.edu/wp-content/themes/cide_general/img/logo45V8.png");
+}
+
+.title-slide {
+  background-image: url("https://raw.githubusercontent.com/JuveCampos/juveBlog/master/bg.png");
+  background-position: center;
+  background-size: cover;
+}
+
+.remark-slide {
+  background-image: url("https://raw.githubusercontent.com/JuveCampos/juveBlog/master/bg.png");
+  background-position: center;
+  background-size: cover;
+}
+
+
+.title-slide .bg-text{
+  position: static;
+  top: 100%;
+  left: 10%;
+  text-align: left;
+  color: #F7F8FA;
+}
+
+.title-slide .remark-slide-number {
+  display: none;
+}
+
+.remark-slide .rectangle{
+        width: 200px;
+        height: 100px;
+        background: red;
+        position: fixed;
+        top: 100%;
+        left: 10%;
+}
+
+.remark-slide {
+  background-color: var(--main-color3);
+  background-image: var(--logo);
+  background-size:  20%;
+  background-position: 5% 95%;
+  background-repeat: no-repeat;
+}
+
+.bg-code {
+  color: var(--code-text-color);
+  background-color: var(--code-background);
+}
+
+/*
+
+.title-slide {
+  width: 60%;
+  text-align: left!important;
+  height:100%;
+  display: table;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: var(--color-opacity70);
+  color: white;
+  padding: 0;
+  border-left-color: white;
+  border-left-style: solid;
+  border-left-width: 0.5em;
+}
+
+.remark-slide {
+  background-color: var(--main-color3);
+  background-image: var(--logo);
+  background-size:  20%;
+  background-position: 5% 95%;
+  background-repeat: no-repeat;
+}
+
+.bg-code {
+  color: var(--code-text-color);
+  background-color: var(--code-background);
+}
+
+.title-slide h1 { padding-top: 20%; font-size: 4em;}
+.title-slide h1, .title-slide h2, .title-slide h3  {
+  padding-left: 4%!important;
+  padding-right: 4%!important;
+}
+
+.title-slide .remark-slide-number { display: none; }
+
+.title-slide h1 { padding-top: 20%; font-size: 4em;}
+
+.title-slide h1, .title-slide h2, .title-slide h3  {
+  padding-left: 4%!important;
+  padding-right: 4%!important;
+}
+*/
+
+.title-slide .remark-slide-number { display: none; }
+
+.title-slide h1{
+  color: white;
+  font-size: 2.5em;
+}
+
+.title-slide h2{
+  color: white;
+  font-size: 2em;
+}
+
+.title-slide h3 {
+  color: black;
+  font-size: 1em;
+}
+
+
+
+.bg-main1 { background-color: var(--main-color1); color: var(--text-color1);}
+.bg-main2 { background-color: var(--main-color2); color: var(--text-color2);}
+.bg-main3 { background-color: var(--main-color3); color: var(--text-color3);}
+.bg-main4 { background-color: var(--main-color4); color: var(--text-color4);}
+.bg-main5 { background-color: var(--main-color5); color: var(--text-color5);}
+.bgcolor_alert { background-color: var(--alert-color)!important; color: var(--text-alert); }
+
+.color-main1 { color: var(--main-color1);}
+.color-main2 { color: var(--main-color2);}
+.color-main3 { color: var(--main-color3);}
+.color-main4 { color: var(--main-color4);}
+.color-main5 { color: var(--main-color5);}
+.color-alert { color: var(--alert-color);}
+
+.shade_main  {
+    background-color: var(--color-opacity70);
+    color: var(--text-opacity);
+    width: 100%;
+    padding: 0;
+}
+
+.remark-visible .remark-slide-scaler {overflow-y: auto;}
+.remark-code {
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.font-mono {
+  font-family: monospace;
+}
+
+
+.remark-code-line-highlighted { background-color: var(--code-highlight); }
+
+body{
+  font-family: 'Poppins';
+  font-weight: normal;
+}
+.remark-code, .remark-inline-code {
+  font-family: 'Source Code Pro', 'Lucida Console', Monaco, monospace;
+  color: var(--code-inline-color);
+}
+.remark-code {
+  color: var(--code-text-color);
+  background-color: var(--code-background);
+}
+
+pre {
+  color: var(--code-text-color);
+  background-color: var(--code-background);
+  line-height: 1.5;
+  padding: 5px;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 400;
+    color: #017683;
+    margin-bottom: 0;
+    margin-top: 10px;
+    font-family: Poppins-Bold;
+}
+
+#rectangle {
+  width: 200px;
+  height: 100px;
+  background: red;
+}
+
+
+h1 { font-size: 3.5em; }
+h2 { font-size: 3em; }
+h3 { font-size: 1.6em; }
+h4 { font-size: 1em; }
+
+body{
+  font-size: 1em;
+}
+
+a { color: var(--link-color); text-decoration: none; }

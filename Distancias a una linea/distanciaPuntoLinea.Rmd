@@ -5,11 +5,23 @@ date: "2/13/2020"
 output: html_document
 ---
 
+<style>
+  h2 {
+  color:red;
+  }
+  
+  iframe{
+        width: 1000px;
+        height: 750px;
+        border: 2px solid #ccc;
+    }
+</style>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-La semana pasada, mientras estaba yo muy a gusto en mi trabajo limpiando bases de datos, un amigo mío muy querido (y aparte, mi ex-jefe) Jesús Carrillo [@ProfeTriste](https://twitter.com/ProfeTriste) me lanzó el siguiente reto: 
+La semana pasada, mientras estaba yo muy a gusto en mi trabajo limpiando bases de datos, un amigo mío muy querido (y aparte, mi ex-jefe) Jesús Carrillo (@ProfeTriste)[https://twitter.com/ProfeTriste] me lanzó el siguiente reto: 
 
 ![](conversacionJesus.png)
 
@@ -142,7 +154,7 @@ linea <- st_linestring(matrix(c(pto[,"geometry"] %>%
 
 Y lo hacemos en un mapa: 
 
-```{r, message=FALSE, cache=FALSE,warning=FALSE}
+```{r, message=FALSE, cache=FALSE,warning=FALSE, out.width=900}
 library(leaflet)
 
 # Hacemos el mapa 
@@ -188,7 +200,7 @@ distancia(X = c(-115.418556,-113.534104, -99.263426),
 
 Y ahora, haremos otra función para dibujar las líneas. Esta función va a empaquetar todos los pasos que seguímos para determinar el punto de la frontera al cual llegaba la línea con la distancia mínima. 
 
-```{r, message=FALSE, cache=FALSE,warning=FALSE}
+```{r, message=FALSE, cache=FALSE,warning=FALSE, out.width=800}
 
 # Funcion para dibujar las lineas de minima distancia
 # Nota, esta función asume que previamente ya cargamos 
@@ -243,6 +255,6 @@ Pues ahora tenemos una función que nos calcula la distancia y las líneas. Ahor
 
 Bueno, y ¿si hacemos una solución en la cual cualquier usuario pueda calcular la distancia de cualquier punto a la frontera sur de Estados Unidos? Esto lo vamos a lograr con la librería `shiny` y pegando todo el código que hemos hecho arriba. 
 
-```{r, message=FALSE, cache=FALSE,warning=FALSE}
+```{r,message=FALSE,cache=FALSE,warning=FALSE,echo=FALSE}
 knitr::include_app("https://lnppmicrositio.shinyapps.io/distanciaAFrontera/")
 ```
