@@ -1,0 +1,282 @@
+---
+title: "Cortando Islas"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<font size="4">**Elaborado por: Juvenal Campos y Ami Sosa**</font>
+
+<font size="4">Ver países y continentes enteros ya no es un derecho exclusivo de los astronautas o los superhéroes. Gracias a los sistemas de información geográfica cada vez es más sencillo crear nuestros propios mapas y representar visualmente los fenómenos que consideramos importantes para entender mejor el mundo que nos rodea. Sin embargo, hacer mapas es un ejercicio **muy poderoso** que puede ser usado para informar o desinformar.</font>
+  
+***  
+
+<font size="4">*"Recuerda, un gran poder conlleva una gran responsabilidad"*</font>  
+![](https://media.giphy.com/media/MCZ39lz83o5lC/giphy.gif)
+  
+  
+***  
+  
+<font size="4">Las **islas** son uno de esos detalles que podemos pasar por alto pero que pueden tener efectos confusos para quienes vean nuestros mapas, ya que **no todas las islas son iguales**. De acuerdo con el INEGI, el Territorio Insular Mexicano está integrado por 2,128 islas entre las cuales sólo 82 están pobladas.</font>
+  
+  
+<font size="4">Es importante investigar previamente para saber con qué tipo de isla estamos lidiando, para decidir si contribuye o deteriora la claridad de comprensión y análisis de nuestros datos.</font>
+  
+  
+<font size="4">Por ejemplo, si estamos mapeando defunciones de COVID-19 por municipio, incluir en nuestro mapa una isla deshabitada que forma parte de un municipio podría llevarnos a visualizar información falsa y decir que esa isla tiene defunciones cuando esta ni si quiera está poblada.</font>
+  
+  
+<font size="4">Entonces, si consideras que lo más conveniente es no mapear una isla pero no sabes cómo eliminarla, no te preocupes, aquí te explicamos cómo hacerlo.</font>
+  
+  
+***
+  
+ 
+<font size="4">Primero lo básico, cargar las librerías `tidyverse`, `sf` y `leaflet` que nos ayudarán a manipular y visualizar información geográfica.</font>
+  
+```{r message=FALSE, cache=FALSE, warning=FALSE}
+# Librerías ----
+library(tidyverse)
+library(sf)
+library(leaflet)
+``` 
+ 
+***  
+  
+<font size="4">Después debemos obtener la base de datos con el archivo de información geográfica que vamos a utilizar para crear nuestro mapa y filtramos el nombre del estado al que le vamos a quitar las islas. En este caso vamos a eliminar las islas Revillagigedo de Colima, que son consideradas como Patrimonio Natural de la Humanidad, como parque nacional y porque tienen una población muy pequeña.</font>
+
+<font size="4">Si quieres descargar la base de datos para replicar este ejercicio, puedes descargarla de este [enlace](https://github.com/JuveCampos/colaboracionesConAmi/raw/master/01_Datos/Shapes/mpios.geojson).</font> 
+  
+* <font size="4">[Islas Revillagigedo](https://es.wikipedia.org/wiki/Archipiélago_de_Revillagigedo)</font>
+
+***
+![](https://media.giphy.com/media/26FfiihphZyQruIp2/giphy.gif)
+
+```{r}
+# Datos ----
+bd <- st_read("01_Datos/Shapes/mpios.geojson", 
+              quiet = T)
+
+# Filtramos Colima
+colima <- bd %>% filter(NOM_ENT == "Colima")
+```
+  
+***
+
+<font size="4">Exploramos la base y la mapeamos para ver cómo se ve el estado con islas y después nos aseguramos de que sea una base geográfica.</font>
+  
+```{r}
+# Exploramos la base 
+plot(colima, max.plot = 1)
+# Si es base geografica :3
+
+# Checamos el sistema de coordenadas 
+## de referencia (crs)
+st_crs(colima)
+```
+  
+***
+  
+<font size="4">La proyección tiene un sistema de referencia de coordenadas igual a 4326 ([WGS84](https://spatialreference.org/ref/epsg/wgs-84/)), lo que significa que está en términos de latitud y longitud.</font>
+  
+<font size="4">Después obtenemos las coordenadas extremas del territorio de Colima, es decir, el punto máximo en x y en y, el punto mínimo en x y en y, buscando generar un cuadro que englobe al estado sin sus islas. Puedes  obtener estas coordenadas en _Juve_ </font>
+  
+  
+```{r}
+# Coordenadas extremas Colima Territorial
+maxX = -103.47499
+minX = -104.76983
+maxY = 19.563769
+minY = 18.65329
+```
+   
+***
+  
+<font size="4">Después elaboramos la matriz de coordenadas que dará origen al cuadro utilizando la función `expand.grid()`. Lo que hace esta función es crear una base de datos con todas las combinaciones posibles de los vectores que introducimos en la función.</font> 
+  
+```{r}
+# Generamos combinaciones de coordenadas a 
+## partir de las coordenadas extremas
+cuadro <- expand.grid(x = c(minX,
+                            maxX),
+                      y = c(minY,
+                            maxY))  %>%
+  as.matrix()
+```
+  
+<font size="4">Una vez que tenemos la matriz, ordenamos las coordenadas de manera que formen un cuadro cerrado, repitiendo la coordenada 1:</font>
+  
+```{r}
+# Forma de ordenar las coordenadas de tal forma
+## que generen una trayectoria que genere 
+## un cuadro
+cuadro <- cuadro[c(1,2,4,3,1),]
+```
+  
+<font size="4">Convertimos el cuadro en una lista para poder convertirlo después en un objeto geométrico poligonal, con el sistema de coordenadas de referencia `crs = 4326` de latitud y longitud.</font> 
+  
+```{r}
+# Convertimos a lista
+cuadro <- list(cuadro)
+# Convertimos a objeto geografico
+cuadro <- st_polygon(cuadro) %>% st_sfc(crs = 4326)
+```
+  
+<font size="4">Ahora si, verifiquemos que el cuadro fue creado correctamente y exploremos cómo se ve.</font>
+  
+```{r}
+# Checamos como se ve el cuadro
+leaflet(colima) %>% 
+  addTiles() %>% 
+  addPolygons(opacity = 1) %>% 
+  addPolygons(data = cuadro, 
+              color = "red")
+```
+  
+<font size="4">!Perfecto! El cuadro rojo que creamos abarca al estado de Colima sin sus islas.</font>
+  
+***
+  
+<font size="4">Pero ¿por qué el orden de coordenaas para cerrar el cuadro no es 1,2,3,4,1? pues porque necesitamos crear un cuadrado y según las coordenadas que nos dio la matriz ese sería el orden adecuado, si lo hacemos del 1 al 4 trazaríamos un moño sobre Colima, no un cuadro.</font> 
+  
+![Moñito de Colima](monito_colima.png)
+  
+***  
+  
+<font size="4">Bueno, ahora a checar que Colima no tenga islas al momento de visualizarla.</font> 
+  
+```{r}
+# Extraemos la parte del poligono de Colima que 
+## se intersecta con el cuadro que generamos 
+colima_sin_islas <- st_intersection(colima, cuadro)
+plot(colima_sin_islas)
+```
+  
+<font size="4">Finalmente tenemos que regresar ese polígono al shape original. Para eso, primero sacamos de nuestra base de datos a Colima con islas y luego metemos a Colima sin islas.</font>
+  
+```{r}
+bd <- bd %>% 
+  filter(NOM_ENT != "Colima")
+
+# Metemos a Colima, sin islas. 
+bd <- rbind(bd, colima_sin_islas)
+
+# Y aquí podemos ver que Colima ya no tiene a las Islas Revillagigedo en nuestro mapa.
+plot(bd, max.plot = 1)
+```
+  
+<font size="4">Por último guardamos nuestro nuevo mapa. **OJO** cuando trabajamos con archivos .geojson, no nos es posible reescribirlos, así que tenemos que crear nuevos archivos para cada cambio que hagamos.</font> 
+  
+```{r eval = FALSE}
+st_write(bd, "01_Datos/Shapes/mpios_sin_revillagigedo.geojson")
+```
+   
+***
+  
+<font size="4">Para agilizar el proceso de cortar islas podemos hacer una función. Los datos de entrada que utilizaremos para nuestra función son las coordenadas del cuadro y el shape que vamos a recortar.</font> 
+  
+```{r}
+recorte_cuadro <- function(shp, 
+                           minX, 
+                           maxX,
+                           minY,
+                           maxY){
+  # Copiamos y adecuamos el código de arriba
+  # Elaboramos la matriz de coordenadas que dará origen al cuadro
+  cuadro <- expand.grid(x = c(minX,
+                              maxX),
+                        y = c(minY,
+                              maxY))  %>%
+    as.matrix()
+  
+  # Ordenamos de manera cíclica el cuadro, y lo cerramos como lo hicimos anteriormente. 
+  cuadro <- cuadro[c(1,2,4,3,1),]
+  
+  # Lo convertimos en lista y después en un objeto geométrico poligonal con sistema de coordenadas de referencia crs = 4326 lat/long. 
+  cuadro <- list(cuadro)
+  cuadro <- st_polygon(cuadro) %>% 
+    st_sfc(crs = 4326)
+  
+  # Ahora si, ¡fuera islas!
+  edo_sin_islas <- st_intersection(shp, cuadro)
+  
+  # Especificamos lo que queremos que nos devuelva la función: 
+  return(edo_sin_islas)
+}
+```
+  
+***
+
+<font size="4">Con nuestra nueva función ahorramos tiempo y podemos cortar las islas de Nayarit y Yucatán mucho más rápido.</font> 
+  
+```{r}
+
+# Remover las Islas Marias de Nayarit... 
+nayarit <- bd %>% 
+  filter(NOM_ENT == "Nayarit")
+
+nayarit_sin_islas_marias <- recorte_cuadro(
+  shp = nayarit, 
+  minX = -105.7765, 
+  maxX = -103.7209, 
+  minY = 20.60322, 
+  maxY = 23.0845)
+
+# Vemos que si funciona. 
+plot(nayarit_sin_islas_marias, max.plot = 1)
+```
+  
+***
+  
+<font size="4">Ahora vamos con Yucatán.</font>
+  
+```{r}
+# Remover el arrecife Alacranes de Yucatan
+yucatan <- bd %>% filter(NOM_ENT == "Yucatán")
+yucatan_sin_arrecife_alacranes <- recorte_cuadro(
+  shp = yucatan,                                 
+  minX = -90.620039,
+  maxX = -87.414154,
+  minY = 19.584267, 
+  maxY = 21.731110)
+
+# Vemos que ya no tiene islas
+plot(yucatan_sin_arrecife_alacranes, max.plot = 1)
+```
+  
+<font size="4">Finalmente generamos una nueva capa de datos sin las islas de Yucatán ni las de Nayarit.</font> 
+  
+```{r eval = FALSE}
+bd <- bd %>% 
+  # Quitamos los estados con islas
+  filter(!(NOM_ENT %in% c("Yucatán", "Nayarit"))) %>% 
+  # Metemos los nuevos sin islas
+  rbind(yucatan_sin_arrecife_alacranes, nayarit_sin_islas_marias) 
+
+# Nos aseguramos de que todo haya funcionado bien 
+plot(bd, max.plot = 1)
+
+# Guardamos el resultado en un nuevo archivo .geojson
+st_write(bd, "01_Datos/Shapes/mpios_con_menos_islas_aun.geojson")
+```
+
+***
+
+<font size="4">**¡Y listo!**</font> 
+  
+<font size="4">Tenemos a los tres estados mapeados sin islas, listos para comunicar información correcta y sin datos que no tengan sentido.</font>
+
+<font size="4">Siempre es un buen ejercicio reflexionar antes de construir mapas y preguntarnos *¿Qué quiero comunicar? ¿Por qué quiero comunicar esto? ¿Cómo se relaciona la geografía con los datos que voy a utilizar? ¿Cómo mapeo mis datos de la manera más clara posible?*</font> 
+
+  
+<font size="4">**Recuerda usar el poder de los mapas responsablemente.**</font> 
+  
+***
+
+![](https://media.giphy.com/media/l46Cnk4ZRTlfeI32o/giphy.gif)
+
+<font size="4">*¡Gracias por leernos!*</font> 
+
+***

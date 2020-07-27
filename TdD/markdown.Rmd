@@ -1,0 +1,432 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Tutorial de Leaflet 
+
+En este <b style = 'color:pink;'>tutorial</b> vamos a realizar mapas en `R`, con la librería `leaflet` utilizando datos para México. 
+
+## Temario: 
+
+1. Leer datos geográficos. 
+2. Manipular datos geográficos para hacer nuestros mapas. 
+3. Mapa 1. Mapas de Puntos.
+4. Mapa 2. Mapas de Polígonos.
+5. Mapa 3. Mapas de Líneas. 
+6. Mapa 4. Mapas de Rasters. 
+7. Mapa 5. Mapas multicapas. 
+8. Mapa 6. Opciones Avanzadas. 
+
+## 1. Leer datos geográficos. 
+
+Antes de empezar a realizar mapas, hay que revisar un par de conceptos básicos. 
+
+**Definición.** Datos geográficos. 
+
+Los datos geográficos consisten en bases de datos que incorporan información geográfica en forma de coordenadas, que permiten asociar un dato a una posición geográfica específica. Estos archivos se pueden encontrar en diversos formatos, entre los que destacan el formato ESRI-shapefile `*.shp`, el formato GeoJson `*.geojson` o el formato `*.csv`, siempre y cuando incluya columnas para coordenadas `x` y `y`. **(Definición propia).**
+
+**Definición:** Sistema de coordenadas
+
+Sistema de referencia utilizado para describir la posición de una ubicación geográfica en el globo terrestre. El Sistema de Coordenadas más comun es el de latitud, longitud y altitud, en el cual se asigna una posición en función de la descomposición en los planos X y Y de un vector trazado desde el centro de la tierra a un punto sobre la superficie de esta, teniendo como origenes el plano del Ecuador y del Meridiano de Greenwich. Para más información revisar esta (referencia)[https://resources.arcgis.com/es/help/getting-started/articles/026n0000000s000000.htm]. 
+
+**Definición:** Elipsoide. 
+
+(((Checar definiciones)))
+
+**Definición:** Sistema de proyección. 
+
+(((Checar definiciones)))
+
+
+## 2. Manipular datos geográficos para hacer mapas. 
+
+Para manipular datos geográficos, en mi experiencia personal recomiendo las siguientes dos librerías: 
+
+1. Librería `sf`
+
+Es una librería para leer, escribir y manipular información geográfica, que trabaja especialmente bien cuando la información es de puntos, líneas o polígonos. Permite abordar las bases de datos geográficas de la misma manera que un `dataframe`, por lo que nos da la posibilidad de utilizar las librerías del `tidyverse` en nuestros datos. 
+
+2. Librería `raster`
+
+Librería para trabajar con datos en formato raster, los cuales consisten en matrices de puntos. 
+
+Las manipulaciones más comunes que se hacen a la información son las siguientes: 
+
+  1. Modificación del sistema de coordenadas. 
+  
+  2. Añadir o quitar observaciones
+  
+  3. Simplificar los datos de los polígonos. 
+  
+  4. Cortar o hacer intersecciones de la información.
+  
+  5. Fusionar poligonos o líneas.
+
+
+## 3. Forma de trabajar. 
+
+Para el presente tutorial vamos a ir aumentando de manera gradual la dificultad de los mapas. 
+<!-- Igualmente, uno de los objetivos principales es el  -->
+
+## Mapa 1. Mapa de Puntos. 
+
+Para la realización del mapa de puntos, vamos a realizar, como ejemplo, un mapa de los puntos de crímenes proveídos por la Agencia Digital de Innovación Pública (ADIP). Esta base de datos contiene las Carpetas de investigación de delitos a nivel de calle de la Procuraduría General de Justicia de la Ciudad de México desde enero de 2016 hasta junio de 2019. 
+
+Para el presente mapa haremos un mapa de homicidios ocurridos en la ciudad de México para los tiempos en los que la base cuenta con registros. 
+
+```{r}
+library(sf)
+library(leaflet)
+library(tidyverse)
+
+carpetas <- st_read("datos/carpetas-de-investigacion-pgj-cdmx.geojson")
+```
+
+
+**Exploramos la base**
+
+Una vez que R ha leído nuestro archivo geográfico, el siguiente paso es explorar la base. 
+
+```{r}
+# Checamos las primeras observaciones de la base
+head(carpetas, 2)
+```
+Como podemos ver, existen variables que almacenan datos de la calle donde ocurrieron los hechos de delito, así como las coordenadas geográficas en formato latitud y longitud, fechas de inicio y de los hechos, la colonia donde ocurrió, el `delito` ejecutado, la `fiscalia` que atendió la denuncia, entre otras.
+
+```{r}
+# Nombres de las variables 
+names(carpetas)
+
+# Dimensiones de la base 
+dim(carpetas)
+```
+
+De la exploración anterior podemos que se cuentan con 808,871 carpetas de investigación por diversos delitos ocurridos en la Ciudad de México en cierto tiempo. En el siguiente bloque de código obtendremos las categorías de delitos registrados y las fechas de inicio y fin del registro de las carpetas. 
+
+```{r}
+
+## CATEGORIAS DE DELITOS
+# Numero de categorias de delitos registrados. 
+levels(carpetas$delito) %>% length()
+
+# Inicio de la lista de delitos registrados: 
+head(levels(carpetas$delito)) # Nota: Si se quieren ver todos los delitos, solo escribir 
+                              # levels(carpetas$delito). 
+
+# Generamos un vector con las categorias de delitos
+delitos <- levels(carpetas$delito)
+
+## FECHAS DE REGISTRO
+# Fechas de inicio y fin 
+head(carpetas$fecha_hechos)
+
+# Como podemos ver, R entiende a las fechas como variables categoricas (factores)
+#   asi que vamos a transformarlas en fechas
+carpetas$fechas <- as.Date(carpetas$fecha_hechos, format = "%Y-%m-%d %H:%M:%S") 
+
+# Fechas maxima y minima
+max(carpetas$fechas %>% na.omit())
+min(carpetas$fechas %>% na.omit())
+
+```
+
+Pues el delito mas antiguo fue registrado en 1906 (_el cuál, si tienes curiosidad, fué un caso de violencia familiar en Iztapalapa_), y el más reciente fué registrado el 30 de junio del 2019. 
+
+Dado que planeamos hacer un mapa de homicidios, vale la pena preguntarnos si existen observaciones de homicidios en la base de datos. Para ello utilizaremos rápidamente la librería `stringr` para detectar si existe la palabra `homicidio` dentro del vector `delitos`. 
+
+```{r}
+# Llamamos a la libreria stringr
+library(stringr)
+
+# Checamos en que delitos existe la palabra homicidio
+#   *NOTA: todos los delitos del vector estan en MAYUSCULAS. 
+delitos[str_detect(delitos, pattern = "HOMICIDIO")]
+
+```
+
+Podemos ver que hay 16 casos en los cuales se incluye la palabra `HOMICIDIO`. Para efectos del mapa, ignoraremos las `TENTATIVA DE HOMICIDIO` y nos concentraremos en los homicidios consumados. Para esto, generaremos un vector con los casos válidos y filtraremos la base para quedarnos con las observaciones que caigan en los 15 casos válidos. 
+
+```{r}
+
+# Vector de casos válidos
+homicidios_consumados <- delitos[str_detect(delitos, pattern = "HOMICIDIO")][-16]
+
+# Filtramos la base total, y la renombramos a base_homicidios 
+base_homicidios <- carpetas[carpetas$delito %in% homicidios_consumados,]   
+
+# Exploramos la base 
+dim(base_homicidios) # 6,784 observaciones
+
+# Exploramos si tienen datos de ubicacion
+base_homicidios$latitud %>% is.na() %>% table() # Condicion logica falsa
+
+```
+
+Ahora si, procederemos a realizar el mapa. Para añadir los puntos utilizaremos la función `addCircleMarkers` con `radius = 0.01`
+
+```{r}
+
+# Funcion para crear un objeto Leaflet / htmlwidget
+map <- leaflet(data = base_homicidios)
+class(map)
+
+# Añadimos puntos mas pequeños al mapa
+map %>% addCircleMarkers(radius = 0.01)
+
+```
+
+Como podemos ver, ya realizamos nuestro primer mapa interactivo con R-Leaflet, al colocar circulos en los puntos donde ocurrieron homicidios. Ahora vamos a añadir mas información.
+
+### Caso 1. Sólo quedarnos con los homicidios del año 2019. 
+
+Primero, haremos un mapa de homicidios para el año 2019. Esto reducirá la cantidad de puntos y nos permitirá concentrarnos en los detalles del mapa. 
+
+**Paso 1. Filtramos la base**
+
+Vamos a filtrar la base de datos para quedarnos sólo con las observaciones del 2019. 
+
+```{r}
+
+# Filtramos la base 
+base_homicidios_2019 <- base_homicidios %>% filter(ao_hechos == 2019)
+```
+
+**Paso 2. Tiles**
+
+En `Leaflet`, los `tiles` son capas que se añaden a los mapas y que actúan como fondo para los puntos, polígonos, líneas y demás capas que conforman un mapa interactivo. Estos `tiles` se actualizan conforme hacemos `zoom in` y `zoom out` a los datos de los mapas, por lo que actuán de manera dinámica ante la interacción del usuario. 
+
+Para ver una galería de los tiles disponibles, se puede visitar el siguiente [enlace](https://leaflet-extras.github.io/leaflet-providers/preview/) y probar los `tiles` proporcionados por la librería de R. Estas capas se añaden al mapa con la función `addProviderTiles()` aplicada a un objeto de clase `leaflet`. 
+
+Para el presente mapa, utilizaremos el `tile` llamado `CartoDB.Positron`, el cual es de colores grises y proporciona un buen contraste con los colores de las capas. 
+
+```{r}
+
+# Creamos objeto leaflet
+mapa_2019 <- leaflet(base_homicidios_2019) 
+
+# Añadimos los tiles. 
+mapa_2019 %>% 
+  addCircleMarkers(radius = 0.01) %>% 
+  addProviderTiles(provider = "CartoDB.Positron")
+
+```
+
+**Paso 3. Eliminemos el zoom-out excesivo y el scroll accidental. **
+
+Para el siguiente detalle, vamos a eliminar el zoom-out excesivo (vamos a bloquearle al usuario la opcion de hacer zoom out fuera del área de interés) y vamos a bloquear el mapa para que el usuario no haga un scroll accidental (no mueva el mapa cuando vaya navegando hacia abajo). 
+
+Para ello, utilizaremos las funciones `leaflet.extras::suspendScroll()` y la opción `leafletOptions(minZoom = 10)` de la función `leaflet()`. Para poder utilizar la primer función, hay que instalar previamente la librería `leaflet.extras` del CRAN. 
+
+```{r}
+library(leaflet.extras)
+
+# Añadimos las opciones. 
+mapa_2019  <- leaflet(base_homicidios_2019, 
+                      options = leafletOptions(zoomControl = FALSE, minZoom = 10)) %>%  
+  addCircleMarkers(radius = 0.01) %>% 
+  addProviderTiles(provider = "CartoDB.Positron") %>% 
+  suspendScroll(wakeMessage = "Haga click o mantenga el cursor sobre el mapa", wakeTime = 1250) 
+
+# Imprimimos el mapa 
+mapa_2019
+
+```
+
+
+
+## Mapa 2. Mapas de Polígonos.
+
+Para la realización de un mapa de polígonos, vamos a utilizar la base de datos de niveles de peligro por AGEB ante fenómenos de inundaciones para la Ciudad de México. El presente mapa está elaborado en base a los datos de peligro a nivel AGEB que proporciona el Atlas de Riesgos de la Ciudad de México, disponible en este (enlace)[http://www.atlas.cdmx.gob.mx/datosabiertos.html].
+
+**Paso 1. ** Exploramos la base de datos. 
+
+Primero exploraremos la base de datos. 
+
+```{r}
+library(sf)
+library(tidyverse)
+library(leaflet)
+
+# Leemos la base de datos
+peligros <- st_read("http://www.atlas.cdmx.gob.mx/datosAbiertos/INDICADORES_AGEB.geojson", quiet = T) %>% 
+  st_transform(crs = 4326)
+
+# Checamos las dimensiones de la base de datos
+dim(peligros)
+
+# Obtenemos el nombre y numero de las variables. 
+names(peligros)
+dim(peligros)
+
+# Graficamos la primera variable (Variable ID de identificación)
+plot(peligros, max.plot = 1)
+```
+
+Como podemos ver de la gráfica anterior, la información viene presentada a nivel polígono, donde cada polígono representa un Área Geoestadística Básica, AGEB, del INEGI. 
+
+Podemos ver que la base de datos, peligros, posee 36 variables. Cada una de estas variables representa información disponible para cada uno de los polígonos AGEB con los que cuenta esta base de datos. Esta base de datos proviene de la Secretaría de Gestión Integral del Riesgo y Protección Civil de la Ciudad de México (SGIRPC), y cuenta con información del Sistema Expuesto de la Ciudad (Infraestructura clave que puede ser dañada por la acción de algún fenómeno natural) así como el grado de peligro a nivel AGEB ante fenómenos como Temperaturas mínimas y máximas, inundaciones, tormentas eléctricas, granizo, nevadas, sismos, entre otros. 
+
+Para la presente demostración, seleccionaremos el peligro ante inundaciones, dejando los demás peligros al lector para que practique la realización de mapas de polígonos. 
+
+**Paso 1. Necesitamos definir que queremos que tenga el mapa**. 
+
+* El mapa que queremos mostrar a continuación lo vamos a **mostrar al público**, por lo que queremos que se vea bien estéticamente.
+
+* El mapa trata de inundaciones de agua, por lo cuál utilizaremos una paleta de color azul, donde la intensidad del color indicará el grado de peligro al usuario. 
+
+* Queremos que se vea la información a nivel delegación/alcaldía, por lo que los bordes de las alcaldías serán ligeramente más gruesos que los de las AGEBs, pero menos que los del contorno general de la Ciudad. 
+
+Entonces, una vez definido que es lo que queremos lograr, procederemos a hacer el código: 
+
+**Paso 2. Realizar el mapa**
+
+A continuación escribiremos el código para realizar el mapa. 
+
+*Primero: * Definamos la paleta de colores a utilizar: 
+
+La paleta de colores se define con la función `leaflet::colorFactor()` si la variable es categórica. Para este caso, la variable que definirá el color es la variable `INUNDACION`, la cual tiene la información de los grados de peligro a los cuales se puede exponer un polígono AGEB:  "Muy Alto","Alto","Medio","Bajo", "Muy Bajo" y "N/D". La paleta `Blues` es una paleta codificada en R, y consiste en un degradado de azules que varían del mas débil al más fuerte. Al seleccionar el argumento `reverse = TRUE` el degradado irá del azul mas fuerte al más débil. 
+
+Antes de la creación de la paleta, recategorizaremos la variable categorica de interés para que las primeras categorías reflejen un mayor grado de peligro que las últimas, ya que, por defecto, `R` asigna los niveles de las categorías por orden alfabético. 
+
+```{r}
+
+# Recategorizamos la variable de peligro por inundacion
+peligros$INUNDACION <- factor(peligros$INUNDACION, levels = c("Muy Alto","Alto","Medio","Bajo", "Muy Bajo", "N/D"))
+
+# Declaramos la paleta de Colores
+paleta <- colorFactor("Blues", peligros$INUNDACION, reverse = T)
+```
+
+*Segundo: * Definir el popUp y las etiquetas.
+
+El **popup** es esa ventanita que nos dá información de utilidad al momento de seleccionar un polígono (observación) con el cursor. En nuestro caso, queremos que el `popup` muestre información del número de AGEB, la alcaldía, el número de viviendas, de escuelas, de hospitales y la población total y dividida por género. 
+
+Los popups tienen la ventaja (y desventaja) de que se escriben en código HTML. Es una ventaja porque permiten declarar directamente cosas sobre el estilo y el formato del texto, y es una desventaja porque hay que aprender un poco de HTML. 
+
+Para declarar el popup, hay que usar la funciooooó `paste()` o su variante `paste0()`, las cuales concatenan (pegan) dos o mas cadenas de texto (`strings`) en una sola. La ventaja de la segunda es que pega sin espacios de por medio, por lo que permite controlar mejor el pegado de caracteres. 
+
+Por otro lado, las etiquetas o `labels` son las ventanas de información que brotan del mapa cuando hacemos `hover` (pasamos el cursor) sobre los polígonos del mapa que creamos. Estos se pueden declarar también como código HTML, pero hay que utilizar la funcion `lapply(label, htmltools::HTML)` a la hora de codificar el mapa para que este entienda que es código de HTML, y no texto plano. 
+
+```{r}
+# Declaramos los popups
+popup <- paste0("<b>AGEB: ", peligros$CVEGEO, "</b>", "<br>", 
+                "<b>Alcaldía: </b>", peligros$ALCALDIA, ", ", peligros$ENTIDAD, "<br>", 
+                "<b>Viviendas Totales: </b>", peligros$VIV_TOT,  "<br>", 
+                "<b>Escuelas: </b>", peligros$ESCUELAS,  "<br>",
+                "<b>Hospitales: </b>", peligros$HOSPITALES,  "<br>",
+                "<b>Población total: </b>", peligros$POB_TOT ,  "<br>",
+                "<b style: 'color:pink;'>Población Femenina: </b>", peligros$POBFEM,  "<br>",
+                "<b style: 'color:#05b3f2;'>Viviendas Masculina: </b>", peligros$POBMAS,  "<br>"
+                )
+
+# Definiendo las etiquetas.
+label <-  paste0("<b style = 'color: green;'>AGEB: ", peligros$CVEGEO, "</b>", "<br>",  peligros$ALCALDIA)
+
+```
+
+**Tercero: ** Añadimos información.
+
+Como pudimos revisar cuando hicimos el mapa exploratorio, la información se presenta a nivel AGEB. Sin embargo, como queremos mostrar la información a nivel alcaldía y también queremos mostrar el perímetro de la Ciudad de México, descargaremos dos capas adicionales: una capa de los municipios y otra del perímetro estatal. Para esto, leeremos dos archivos del tipo `*.geojson` que tengo almacenados en mi perfil de GitHub.
+
+Como sugerencia, en caso de que hagas mapas de manera frecuente, siempre ten los archivos que m'as utilices a la mano. 
+
+```{r}
+# Mapa de municipios de la CDMX
+mapa_municipios <- st_read("https://github.com/JuveCampos/Shapes_Resiliencia_CDMX_CIDE/raw/master/Zona%20Metropolitana/EdosZM.geojson", quiet = T) %>% 
+  filter(CVE_ENT == "09") # Filtramos a la entidad 09, Ciudad de México.
+
+# Mapa de la entidad de la Ciudad de México
+mapa_cdmx <- st_read("https://github.com/JuveCampos/Shapes_Resiliencia_CDMX_CIDE/raw/master/Zona%20Metropolitana/EstadosZMVM.geojson", quiet = T)[3,] # Nos quedamos con el perimetro sólo de la Ciudad de México.
+
+```
+
+**Cuarto: ** Codificamos el mapa. 
+
+Ahora si, a codificar el mapa. Dentro del código, se dará la instrucción puntual para describir que es lo que hace cada uno de los comandos de R dentro del mapa. 
+
+```{r}
+##########################
+# MAPA 2 - INUNDACION #
+##########################
+
+# Codificando el mapa.
+
+# 1. Creamos un objeto leaflet, a partir de la base de peligros, cargada previamente. 
+map <- leaflet(peligros) %>%  
+# 2. Aniadimos el fondo CartoDB.Positron.   
+  addProviderTiles("CartoDB.Positron") %>%
+# 3. Aniadimos los poligonos.   
+  addPolygons(highlightOptions = highlightOptions(color = "white"), # Highlight del contorno con paso del cursor. 
+              color = "#444444", # Color base del contorno
+              weight = 0.2,  # Grosor del Contorno
+              smoothFactor = 0.5, 
+              opacity = 1, # Opacidad del contorno del poligono
+              label = lapply(label, htmltools::HTML), 
+              fillOpacity = 0.8, 
+              fillColor = ~paleta(peligros$INUNDACION) ) %>%    #
+  addPolygons(data = mapa_cdmx, 
+              color = "#444444",
+              weight = 4, 
+              opacity = 1,
+              fill = F
+  ) %>% 
+  addPolygons(data = mapa_municipios, 
+              color = "#444444",
+              weight = 2, 
+              opacity = 1,
+              fill = F
+  ) %>% 
+  # addScaleBar(position = "bottomright") %>%   
+  addLegend(position = "bottomright", 
+            pal = paleta, 
+            values = peligros$INUNDACION,     #
+            title = "<div a style = 'color:red;'>Peligro:</div>Inundación", #
+            opacity = 1,
+            labFormat = labelFormat(suffix = " ")) 
+
+# Imprimimos el mapa
+map
+
+```
+
+## Mapa 3. Mapa de Líneas. 
+
+Para la realización del mapa de líneas, vamos a utilizar el mapa del sistema del drenaje profundo de la Ciudad de México, cuyos datos provienen de la plataforma (Geocomunes)[http://geocomunes.org]. 
+
+```{r}
+
+# DRENAJE. CAPA ORIGINALMENTE PROVENIENTE DE GEOCOMUNES
+d <- st_read("http://132.248.14.102/geoserver/wfs?srsName=EPSG%3A4326&typename=CapaBase%3Aiii_1_6_red_drenajedf&outputFormat=json&version=1.0.0&service=WFS&request=GetFeature") %>% 
+  mutate(tipo_drenaje = case_when(Tipo == "Canal o Rio" ~ "Drenaje Superficial (Canal o río)", 
+                                  Tipo == "Interceptor" | Tipo == "Tunel" ~ "Drenaje Profundo (Interceptor o Túnel)", 
+                                  Tipo == "" ~ "Proyecto del Túnel Emisor Oriente"
+                                  ))
+d$tipo_drenaje[c(40,41,42)] <- "Drenaje Superficial (Canal o río)"
+#d$Length <- st_length(d)
+
+```
+
+
+## Mapa 4. Mapas de Rasters. 
+
+Para la realización del mapa de rasters, utilizaremos información de la precipitación a nivel nacional proveniente del UNIATMOS de la UNAM. 
+
+
+
+
+
+## Mapa 5. Mapa Multicapa.
+
+Para la realización de un mapa multicapa, utilizaremos bases de datos de indicadores del INEGI a nivel estatal. 
+
+## Mapa 6. Opciones Avanzadas. 
+
+Para este caso utilizaremos alguno de los mapas realizados previamente para realizar una aplicación con `R-Shiny`. 
+
+## Referencias. 
+
+* **Georreferenciación y sistemas de coordenadas**. ESRI. ArcGIS Online. Consultado el Sábado, 3 de Agosto del 2019 en https://resources.arcgis.com/es/help/getting-started/articles/026n0000000s000000.html. 
+
+
+

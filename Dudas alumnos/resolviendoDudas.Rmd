@@ -1,0 +1,119 @@
+---
+title: "Dudas"
+author: "Juvenal Campos"
+date: "4/19/2020"
+output: html_document
+---
+
+# Dudas alumnos
+
+
+
+## Dudas Ami
+
+### Georreferenciación de puntos en un mapa. 
+
+Para georreferenciar puntos en un mapa (a mi estilo), hay una forma muy sencilla de hacerlo: 
+
+**Paso 1. ** Tener idea de que puntos queremos georreferenciar.
+
+Para este ejemplo vamos a referenciar los puntos de tres escuelas muy importantes de la Ciudad de México: El Colegio de México, El CIDE y la UNAM. 
+
+**Paso 2. ** Buscar las coordenadas de los puntos. 
+
+Bajo un sistema de coordenadas latitud/longitud con coordenadas decimales (ojo, no grados-minutos-segundos, sino grados, punto y decimales), generamos en excel una tabla con los siguientes datos: 
+
+* Una columna para el nombre del lugar (en este caso, le llamaremos `lugar`).
+
+* Una columna para la para la latitud (coordenada `Y`), que en este caso llamaremos `lat`. 
+
+* Una columna para la longitud (coordenada `X`), que en este caso llamaremos `lon`.
+
+**Paso 3. ** Conseguimos las coordenadas
+
+Para conseguir las coordenadas, abrimos nuestro _Google Maps_, y buscamos los lugares de interés. Una vez buscados, les damos doble click, para desplegar las coordenadas en el formato que definimos antes (latitud y longitud con puntos decimales).
+
+Una vez que tenemos estos datos, los incluímos en nuestra hoja de excel, y guardamos el archivo.
+
+**Paso 4. ** Abrir los archivos en RStudio y convertirlos en una base de datos geográfica. 
+
+Para este paso, abrimos el archivo de coordenadas como se muestra a continuación: 
+
+```{r}
+# Librerias ----
+library(readxl)    # Leer exceles
+library(tidyverse) # Manejar datos
+library(sf)        # Manejar datos geograficos
+
+# Abrimos datos ----
+escuelas <- read_xlsx("coords.xlsx")
+
+# Vemos que tipo de base es
+class(escuelas)
+
+```
+
+Ya abierto el excel, vemos que este no es un archivo geografico, sino que R lo considera como una tabla común y corriente. Para que la considere como una base de datos geográfica, haremos lo siguiente: 
+
+```{r}
+
+# Convertimos a base de datos geografica
+escuelas <- escuelas %>% 
+  st_as_sf(coords = c("lon", "lat"))
+
+# Corroboramos analizando la clase
+class(escuelas)
+
+```
+
+Al tener la clase `sf`, podemos ver que ya se considera como una base de datos geográfica. Para ello, graficamos la base `escuelas` en un mapa: 
+
+```{r}
+
+# Mi libreria favorita de R para hacer mapas
+library(leaflet)
+
+leaflet() %>% addTiles() %>%
+  addPopups(-122.327298, 47.597131, content,
+    options = popupOptions(closeButton = FALSE)
+  )
+
+# Creacion del mapa
+escuelas %>% 
+  leaflet() %>% 
+  #addTiles() %>% 
+  addCircleMarkers(color = "black") %>% 
+  addPopups(popup = escuelas$lugar, 
+            options =  popupOptions(closeButton = FALSE))
+
+```
+
+## Dudas Natalia
+
+La librería `leaflet` no es originalmente una librería de R, sino de otro lenguaje llamada **JavaScript**, el cual es, junto con las hojas de estilo **CSS**, los mecanismos que nos permiten tener mapas interactivos en R. Usando solo código de R, podemos hacer mapas bonitos, pero para realizar una personalización más profunda, tenemos que modificar de alguna manera lo escrito en los lenguajes de arriba. 
+
+La colega **N** el otro dia me manifestó dos inquietudes: 
+
+1) ¿Cómo puedo hacer mapas en leaflet con el fondo blanco? y 
+
+2) ¿Cómo puedo cambiar el tipo de fuente en la leyenda de mi mapa? 
+
+Dado que la colega **N** iba a imprimir sus resultados en papel, y no requería de todas las funcionalidades de `leaflet`, hubiese sido más recomendable utilizar la librería `ggplot` para hacer los mapas.
+
+Sin embargo, dado que es la que sabe usar, vamos a ver como configurar la librería para que el default sea un fondo blanco en vez de uno gris. 
+
+
+
+## ¿Cómo puedo hacer mapas en leaflet con el fondo blanco?
+
+
+
+
+## Dudas Saul 
+
+
+
+## Dudas Claudia
+
+
+
