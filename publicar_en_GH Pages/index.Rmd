@@ -1,0 +1,78 @@
+---
+output: html_document
+---
+
+<style>
+
+.piePagina{
+  color:gray;
+  size:15;
+  text-align:center;
+}
+
+</style>
+
+# Publicando un HTML de RMarkdown con Github pages. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introducción. 
+
+Una de las alternativas para publicar nuestras páginas web generadas con RMarkdown es el subirlas a [Github pages](https://pages.github.com). Estas alternativas son de ayuda si no podemos (**o no queremos**) publicar nuestros documentos de RMarkdown en RPubs.
+
+Github pages es un servicio de Github para poder publicar pequeñas páginas web _estáticas_, lo que significa que, entre otras cosas, no se presenta la opción al usuario de modificar el contenido de lo que ve. Este es el caso de páginas de documentación, blogs personales, portafolios de trabajo, etc. 
+
+En el presente blog-tutorial, vamos a ver como podemos hacer uso de este servicio para alojar nuestros sitios web, utilizando las páginas que creamos de RMarkdown. 
+
+## Requerimientos
+
+Para poder hacer uso de este servicio, requerimos dos cosas: 
+
+1) **Un documento HTML para publicar (al menos)**. En nuestro caso como programadores de R, utilizaremos el documento `HTML` que nos arroja el botón `knit` cuando trabajamos con RMarkdown (aunque pudiera ser otro tipo de documento de HTML). 
+
+<!-- Este documento principal (el de home, landing o de llegada) deberá **forzosamente** llamarse `index.html`.  -->
+
+<p class = 'piePagina'>Este nombre lo puedes poner desde que lo estas creando o lo puedes renombrar más adelante.</p>
+
+2) Acceso a una **cuenta de Github**. Para usar GH-Pages tienes que tener tu cuenta de Github y entrar a ella. 
+
+3) **Un repositorio para almacenar los archivos de nuestra página web**. Este repositorio es una carpeta que debe contener la página HTML, las carpetas para las subpáginas y los archivos que necesita la página para existir (por ejemplo, imagenes, hojas de estilo CSS, scripts en Javascript, librerías de R, etc.). **Esta carpeta/repositorio va a ser el hosting o lugar de almacenamiento de los archivos.**
+
+4) **Dar de alta nuestra página web** en la parte de configuración de Github Pages. **Este paso nos va a dar un dominio o dirección de acceso para nuestra página**.
+
+## Procedimiento. 
+
+* **Paso 1. ** Creamos nuestro carpeta o repositorio con el documento HTML y los documentos que la página necesita para funcionar. 
+
+* **Paso 2. ** Creamos el repositorio en la página de Github. 
+
+* **Paso 3. ** Cargamos los archivos generados en el paso 1. 
+
+* **Paso 4. ** Dentro de nuestro repositorio, nos vamos a `Settings` y bajamos hasta la sección de `Github pages`. De ahí seleccionamos `Master` y le damos en `Save`.
+
+* **Paso 5. ** Esto habrá generado la página en Github Pages. El dominio de la página se habrá generado utilizando la siguiente sintaxis: 
+
+```
+http://username.github.io/repository
+```
+
+Por ejemplo, si mi nombre de usuario es `juvecampos` y mi repositorio se llama `subirpagina`, mi sitio se va a llamar 
+
+```
+https://juvecampos.github.io/subirpagina/
+```
+
+Y de esta manera ya tengo un sitio que puede ser visitado por la gente para publicar cosas. 
+
+## Casos de uso. 
+
+Este método de carga nos permite flexibilidad para subir todo tipo de páginas. Por ejemplo, si eventualmente aprendemos a utilizar mejor HTML, CSS y/o JavaScript, podemos subir acá páginas más elaboradas y no tan restringidas a lo que nos permite construir RMarkdown. 
+
+Otra ventaja es que nos permite subir documentos a internet que van a estar accesibles de manera pública de forma sencilla, sin usar, por ejemplo, Google Drive o Dropbox. 
+
+Igualmente, si queremos hacer pruebas de páginas web más complejas, podemos utilizar este servicio. 
+
+También podemos utilizar repositorios de Github junto a un servicio llamado [Netlify](https://www.netlify.com) para personalizar el dominio (la dirección web) y tener un producto más robusto y adecuado a nuestras necesidades.
+
